@@ -1,0 +1,27 @@
+{
+	"name": "docker101",
+	"image": "ghcr.io/retaildevcrews/kind",
+	"runArgs": ["--init", "--privileged"],
+	"overrideCommand": false,
+
+	"remoteUser": "akdc",
+
+	"containerEnv":
+	{
+		"CosmosDatabase": "imdb",
+		"CosmosCollection": "movies",
+		"CosmosUrl": "https://ngsa-pre-cosmos.documents.azure.com:443/"
+	},
+
+	// Install extensions
+	"extensions": [
+		"davidanson.vscode-markdownlint",
+		"gruntfuggly.todo-tree",
+		"ms-azuretools.vscode-docker",
+		"mutantdino.resourcemonitor",
+		"humao.rest-client"
+	],
+
+	// Run Bash script in .devcontainer directory
+	"postCreateCommand": "/bin/bash ./.devcontainer/post-install.sh"
+}
