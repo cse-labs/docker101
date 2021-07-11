@@ -209,3 +209,26 @@ docker run -d --name loderunner-fix --rm --entrypoint sh --net web ngsa-lr:spark
 # Verify fixed load test
 docker exec loderunner-fix dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark.json
 ```
+
+## Dockerfile
+
+```bash
+# Update ./loderunner/benchmark.json by replacing 'zzz' with 'api'
+
+# Build image from Dockerfile
+docker build ./loderunner -t ngsa-lr:dockerfile
+
+# Verify new image
+docker images
+
+# Run newly create image in container
+# -d - Detached
+# --name - Naming the container
+# --rm - Automatically remove container when stopped
+# --entrypoint - Overwrites the image's default ENTRYPOINT which states the start of a command and tacks on the rest from docker run
+# --net - Connect a container to a network
+docker run -d --name loderunner-dockerfile --rm --entrypoint sh --net web ngsa-lr:dockerfile -c "sleep 99999d"
+
+# Verify fixed load test
+docker exec loderunner-dockerfile dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark.json
+```
