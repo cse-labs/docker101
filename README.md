@@ -58,3 +58,28 @@ exit
 # Fetch the logs of the container
 docker logs ngsa
 ```
+
+## Ports
+
+```bash
+# Remove the container because we can't expose ports on a running container
+docker rm ngsa
+
+# Force the removal of a running container
+# -f - Force the removal of a running container
+docker rm -f ngsa
+
+# Verify the container was removed
+docker ps -a
+
+# Start a container with an exposed port
+# -d - Detached
+# --name - Naming the container
+# --rm - Automatically remove container when stopped
+# -p - Publish a container's port(s) to the host (HOST_PORT:CONTAINER_PORT)
+# --in-memory - Not a docker option. Passed in flag to the ngsa-app via Dockerfile entrypoint
+docker run -d --name ngsa --rm -p 80:8080 ngsa-app:beta --in-memory
+
+# Verify app on exposed port
+http localhost:80/version
+```
