@@ -114,6 +114,33 @@ docker network inspect web
 # -f - Not a docker option. Passed in flag to LodeRunner via image's ENTRYPOINT
 docker exec loderunner dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark.json
 
-# The load test failed
+# Output should show load test "Failed: * Errors"
 # benchmark.json file on the loderunner container needs to be updated
+```
+
+## Volumes
+
+```bash
+# Kill container
+docker kill loderunner
+
+# Verify container was removed when stopped
+docker ps -a
+
+# Run the container and mount the file we want to edit
+# -d - Detached
+# --name - Naming the container
+# --rm - Automatically remove container when stopped
+# --entrypoint - Overwrites the image's default ENTRYPOINT which states the start of a command and tacks on the rest from docker run
+# --net - Connect a container to a network
+# -v - Bind mount a volume
+docker run -d --name loderunner --rm --entrypoint sh --net web -v $(pwd)/loderunner/benchmark.json:/app/TestFiles/benchmark.json ghcr.io/joheec/ngsa-lr:spark -c "sleep 999999d"
+
+# Update the loderunner/benchmark.json in loderunner container
+# Replace 'zzz' with 'api'
+
+# Execute LodeRunner load test on ngsa-app with updated benchmark.json
+docker exec loderunner dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark.json
+
+# Output should no longer show "Failed: * Errors"
 ```
