@@ -232,3 +232,44 @@ docker run -d --name loderunner-dockerfile --rm --entrypoint sh --net web ngsa-l
 # Verify fixed load test
 docker exec loderunner-dockerfile dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark.json
 ```
+
+## Notes
+
+Volumes - virtual "discs" to store and share data
+
+* persistent - shared between host and container
+  * docker run -ti -v /Users/root/example:/shared-folder ubuntu bash
+* ephemeral - sticks around while being used by container
+  * docker run -ti -v /shared-data --name containerA ubuntu bash
+  * docker run -ti --volumes-from containerA --name containerB ubuntu bash
+
+docker system prune -a / docker system prune -f
+
+* It often gets GBs of disk space back. Don't use if debugging big docker build as it will delete all of your cached build layers and you'll rebuild from scratch
+* Remove all unused containers, networks, images (both dangling and unreferenced), and optionally, volumes.
+
+Dockerfile Commands
+
+* FROM - which image to download and start from
+  * must be first command in dockerfile
+  * multiple from commands means dockerfile produces more than one image
+* MAINTAINER
+* RUN - runs the command line, waits for finish, and saves result
+* ADD - adds local files, add the contents of tar archives, and downloads from URLS
+* ENV - sets environment variables and available during build in in resulting image
+* ENTRYPOINT - start of command and tacks on rest of command from docker run
+* CMD - specifies whole command
+  * docker run command replaces CMD
+* ENTRYPOINT + CMD - runs one after another
+* Command syntax for ENTRYPOINT, RUN, and CMD
+  * shell form: nano notes.txt
+    * called surrounded by a shell, like bash
+  * exec form: ["/bin/nano", "notes.txt"]
+    * calls directly
+    * slightly more efficient
+* EXPOSE - exposes port to container
+* VOLUME
+  * shared volumes: VOLUME ["/host/path/" "/container/path/"]
+  * ephemeral volumes: VOLUME ["/shared-data"]
+* WORKDIR - sets directory for remainder of Dockerfile and resulting container when run
+* USER - sets the user the container will run as
