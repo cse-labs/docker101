@@ -77,9 +77,43 @@ docker ps -a
 # --name - Naming the container
 # --rm - Automatically remove container when stopped
 # -p - Publish a container's port(s) to the host (HOST_PORT:CONTAINER_PORT)
-# --in-memory - Not a docker option. Passed in flag to the ngsa-app via Dockerfile entrypoint
+# --in-memory - Not a docker option. Passed in flag to ngsa-app via image's ENTRYPOINT
 docker run -d --name ngsa --rm -p 80:8080 ngsa-app:beta --in-memory
 
 # Verify app on exposed port
 http localhost:80/version
+```
+
+## Network
+
+```bash
+# Start a container
+# -d - Detached
+# --name - Naming the container
+# --rm - Automatically remove container when stopped
+# --entrypoint - Overwrites the image's default ENTRYPOINT which states the start of a command and tacks on the rest from docker run
+docker run -d --name loderunner --rm --entrypoint sh ghcr.io/joheec/ngsa-lr:spark -c "sleep 999999d"
+
+# Show networks
+docker network ls
+
+# Create a network
+docker network create web
+
+# Connect containers to the network
+docker network connect web ngsa
+docker network connect web loderunner
+
+# Verify containers were added to network
+docker network inspect web
+
+# Execute LodeRunner load test on ngsa-app via network call
+# -s - Not a docker option. Passed in flag to LodeRunner via image's ENTRYPOINT.
+#      ngsa is the container on the network.
+#      8080 is the port ngsa-app is listening on in the ngsa container.
+# -f - Not a docker option. Passed in flag to LodeRunner via image's ENTRYPOINT
+docker exec loderunner dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark.json
+
+# The load test failed
+# benchmark.json file on the loderunner container needs to be updated
 ```
