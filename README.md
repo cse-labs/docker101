@@ -144,3 +144,68 @@ docker exec loderunner dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark.
 
 # Output should no longer show "Failed: * Errors"
 ```
+
+## Commit Image Layer
+
+```bash
+# Try running new container with image to see fixed load test
+# -d - Detached
+# --name - Naming the container
+# --rm - Automatically remove container when stopped
+# --entrypoint - Overwrites the image's default ENTRYPOINT which states the start of a command and tacks on the rest from docker run
+# --net - Connect a container to a network
+docker run -d --name loderunner-fix --rm --entrypoint sh --net web ghcr.io/joheec/ngsa-lr:spark -c "sleep 99999d"
+
+# Try to execute fixed load test
+docker exec loderunner-fix dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark.json
+
+# benchmark.json only changed in container
+# benchmark.json wasn't updated in image
+# New containers from that image won't have the fix
+
+# **NOTE**
+# Can commit changes in a container to an image
+# The commit operation will not include any data contained in volumes mounted inside the container
+# In the loderunner container, the benchmark.json was mounted, and its changes cannot be commited
+# Will make change directly in loderunner-fix container to commit change
+
+# Open shell in container
+# -i - Interactive. Keep STDIN open even if not attached
+# -t - Allocate a pseudo-TTY
+docker exec -it loderunner-fix sh
+
+# Open file in container
+vi benchmark.json
+
+# Edit file in container
+:%s/zzz/api/g
+
+# Save file in container
+:wq
+
+# Leave the container
+exit
+
+# Verify successful load test
+docker exec loderunner-fix dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark.json
+
+# Commit container change to image
+docker commit loderunner-fix ngsa-lr:sparkfix
+
+# Verify new image
+docker images
+
+# Kill container to re-use name
+docker kill loderunner-fix
+
+# Run newly create image in container
+# -d - Detached
+# --name - Naming the container
+# --rm - Automatically remove container when stopped
+# --entrypoint - Overwrites the image's default ENTRYPOINT which states the start of a command and tacks on the rest from docker run
+# --net - Connect a container to a network
+docker run -d --name loderunner-fix --rm --entrypoint sh --net web ngsa-lr:sparkfix -c "sleep 99999d"
+
+# Verify fixed load test
+docker exec loderunner-fix dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark.json
+```
