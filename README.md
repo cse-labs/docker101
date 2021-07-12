@@ -29,10 +29,10 @@ docker images
 docker ps -a
 
 # Start a container with a running image
-# -d - Detached
 # --name - Naming the container
+# -d - Detached
 # --in-memory - Not a docker option. Passed in flag to the ngsa-app via Dockerfile entrypoint
-docker run -d --name ngsa ngsa-app:beta --in-memory
+docker run --name ngsa -d ngsa-app:beta --in-memory
 
 # See running containers
 docker ps
@@ -73,12 +73,12 @@ docker rm -f ngsa
 docker ps -a
 
 # Start a container with an exposed port
-# -d - Detached
 # --name - Naming the container
+# -d - Detached
 # --rm - Automatically remove container when stopped
 # -p - Publish a container's port(s) to the host (HOST_PORT:CONTAINER_PORT)
 # --in-memory - Not a docker option. Passed in flag to ngsa-app via image's ENTRYPOINT
-docker run -d --name ngsa --rm -p 80:8080 ngsa-app:beta --in-memory
+docker run --name ngsa -d --rm -p 80:8080 ngsa-app:beta --in-memory
 
 # Verify app on exposed port
 http localhost:80/version
@@ -88,11 +88,11 @@ http localhost:80/version
 
 ```bash
 # Start a container
-# -d - Detached
 # --name - Naming the container
+# -d - Detached
 # --rm - Automatically remove container when stopped
 # --entrypoint - Overwrites the image's default ENTRYPOINT which states the start of a command and tacks on the rest from docker run
-docker run -d --name loderunner --rm --entrypoint sh ghcr.io/joheec/ngsa-lr:spark -c "sleep 999999d"
+docker run --name loderunner -d --rm --entrypoint sh ghcr.io/asb-spark/ngsa-lr:spark -c "sleep 999999d"
 
 # Show networks
 docker network ls
@@ -128,13 +128,13 @@ docker kill loderunner
 docker ps -a
 
 # Run the container and mount the file we want to edit
-# -d - Detached
 # --name - Naming the container
+# -d - Detached
 # --rm - Automatically remove container when stopped
 # --entrypoint - Overwrites the image's default ENTRYPOINT which states the start of a command and tacks on the rest from docker run
 # --net - Connect a container to a network
 # -v - Bind mount a volume
-docker run -d --name loderunner --rm --entrypoint sh --net web -v $(pwd)/loderunner/benchmark.json:/app/TestFiles/benchmark.json ghcr.io/joheec/ngsa-lr:spark -c "sleep 999999d"
+docker run --name loderunner -d --rm --entrypoint sh --net web -v $(pwd)/loderunner/benchmark.json:/app/TestFiles/benchmark.json ghcr.io/asb-spark/ngsa-lr:spark -c "sleep 999999d"
 
 # Update the loderunner/benchmark.json in loderunner container
 # Replace 'zzz' with 'api'
@@ -149,12 +149,12 @@ docker exec loderunner dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark.
 
 ```bash
 # Try running new container with image to see fixed load test
-# -d - Detached
 # --name - Naming the container
+# -d - Detached
 # --rm - Automatically remove container when stopped
 # --entrypoint - Overwrites the image's default ENTRYPOINT which states the start of a command and tacks on the rest from docker run
 # --net - Connect a container to a network
-docker run -d --name loderunner-fix --rm --entrypoint sh --net web ghcr.io/joheec/ngsa-lr:spark -c "sleep 99999d"
+docker run --name loderunner-fix -d --rm --entrypoint sh --net web ghcr.io/asb-spark/ngsa-lr:spark -c "sleep 99999d"
 
 # Try to execute fixed load test
 docker exec loderunner-fix dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark.json
@@ -199,12 +199,12 @@ docker images
 docker kill loderunner-fix
 
 # Run newly create image in container
-# -d - Detached
 # --name - Naming the container
+# -d - Detached
 # --rm - Automatically remove container when stopped
 # --entrypoint - Overwrites the image's default ENTRYPOINT which states the start of a command and tacks on the rest from docker run
 # --net - Connect a container to a network
-docker run -d --name loderunner-fix --rm --entrypoint sh --net web ngsa-lr:sparkfix -c "sleep 99999d"
+docker run --name -d loderunner-fix --rm --entrypoint sh --net web ngsa-lr:sparkfix -c "sleep 99999d"
 
 # Verify fixed load test
 docker exec loderunner-fix dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark.json
@@ -213,7 +213,7 @@ docker exec loderunner-fix dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchm
 ## Dockerfile
 
 ```bash
-# Update ./loderunner/benchmark.json by replacing 'zzz' with 'api'
+# Make sure ./loderunner/benchmark.json is update by replacing 'zzz' with 'api'
 
 # Build image from Dockerfile
 docker build ./loderunner -t ngsa-lr:dockerfile
