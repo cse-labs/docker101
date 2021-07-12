@@ -204,7 +204,7 @@ docker kill loderunner-fix
 # --rm - Automatically remove container when stopped
 # --entrypoint - Overwrites the image's default ENTRYPOINT which states the start of a command and tacks on the rest from docker run
 # --net - Connect a container to a network
-docker run --name -d loderunner-fix --rm --entrypoint sh --net web ngsa-lr:sparkfix -c "sleep 99999d"
+docker run --name loderunner-fix -d --rm --entrypoint sh --net web ngsa-lr:sparkfix -c "sleep 99999d"
 
 # Verify fixed load test
 docker exec loderunner-fix dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark.json
