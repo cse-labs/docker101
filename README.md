@@ -2,6 +2,55 @@
 
 Docker Introduction: <https://docs.microsoft.com/en-us/dotnet/architecture/microservices/container-docker-introduction>
 
+## Overview of Docker Commands
+
+### Images
+
+```bash
+# Display local images
+docker images 
+# Pull an image from a repository
+docker pull  
+# Tag image with a nickname that will reference the source image
+docker tag 
+# Save container changes to an image
+docker commit 
+# Push an image up to a repository
+docker push 
+# Build an image from the Dockerfile
+docker build
+```
+
+### Containers
+
+```bash
+# Display current containers
+docker ps
+# Run a container from an image
+docker run
+# Start a new process to run commands in a running container
+docker exec
+# Display container logs
+docker logs
+#  Stop a running container
+docker kill
+# Delete a container
+docker rm
+```
+
+### Networks
+
+```bash
+# Display current networks
+docker network ls
+# Create a network
+docker network create
+# Connect containers to a network
+docker network connect
+# Display network details including connected containers
+docker network inspect
+```
+
 ## Getting a Docker Image
 
 ```bash
@@ -93,6 +142,9 @@ http localhost:80/version
 # --rm - Automatically remove container when stopped
 # --entrypoint - Overwrites the image's default ENTRYPOINT which states the start of a command and tacks on the rest from docker run
 docker run --name loderunner -d --rm --entrypoint sh ghcr.io/asb-spark/ngsa-lr:spark -c "sleep 999999d"
+
+# Verify the container is running
+docker ps 
 
 # Show networks
 docker network ls
