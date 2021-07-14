@@ -92,7 +92,7 @@ http localhost:80/version
 # -d - Detached
 # --rm - Automatically remove container when stopped
 # --entrypoint - Overwrites the image's default ENTRYPOINT which states the start of a command and tacks on the rest from docker run
-docker run --name loderunner -d --rm --entrypoint sh ghcr.io/asb-spark/ngsa-lr:spark -c "sleep 999999d"
+docker run --name webvalidate -d --rm --entrypoint sh ghcr.io/asb-spark/docker101-webv:spark -c "sleep 999999d"
 
 # Show networks
 docker network ls
@@ -102,27 +102,27 @@ docker network create web
 
 # Connect containers to the network
 docker network connect web ngsa
-docker network connect web loderunner
+docker network connect web webvalidate
 
 # Verify containers were added to network
 docker network inspect web
 
-# Execute LodeRunner load test on ngsa-app via network call
-# -s - Not a docker option. Passed in flag to LodeRunner via image's ENTRYPOINT.
+# Execute WebV load test on ngsa-app via network call
+# -s - Not a docker option. Passed in flag to WebV via image's ENTRYPOINT.
 #      ngsa is the container on the network.
 #      8080 is the port ngsa-app is listening on in the ngsa container.
-# -f - Not a docker option. Passed in flag to LodeRunner via image's ENTRYPOINT
-docker exec loderunner dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark.json
+# -f - Not a docker option. Passed in flag to WebV via image's ENTRYPOINT
+docker exec webvalidate dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark.json
 
 # Output should show load test "Failed: * Errors"
-# benchmark.json file on the loderunner container needs to be updated
+# benchmark.json file on the webvalidate container needs to be updated
 ```
 
 ## Volumes
 
 ```bash
 # Kill container
-docker kill loderunner
+docker kill webvalidate
 
 # Verify container was removed when stopped
 docker ps -a
@@ -134,13 +134,13 @@ docker ps -a
 # --entrypoint - Overwrites the image's default ENTRYPOINT which states the start of a command and tacks on the rest from docker run
 # --net - Connect a container to a network
 # -v - Bind mount a volume
-docker run --name loderunner -d --rm --entrypoint sh --net web -v $(pwd)/loderunner/benchmark.json:/app/TestFiles/benchmark.json ghcr.io/asb-spark/ngsa-lr:spark -c "sleep 999999d"
+docker run --name webvalidate -d --rm --entrypoint sh --net web -v $(pwd)/webvalidate/src/app/benchmark.json:/app/TestFiles/benchmark.json ghcr.io/asb-spark/docker101-webv:spark -c "sleep 999999d"
 
-# Update the loderunner/benchmark.json in loderunner container
+# Update the app/TestFiles/benchmark.json in webvalidate container
 # Replace 'zzz' with 'api'
 
-# Execute LodeRunner load test on ngsa-app with updated benchmark.json
-docker exec loderunner dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark.json
+# Execute WebV load test on ngsa-app with updated benchmark.json
+docker exec webvalidate dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark.json
 
 # Output should no longer show "Failed: * Errors"
 ```
@@ -154,10 +154,10 @@ docker exec loderunner dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark.
 # --rm - Automatically remove container when stopped
 # --entrypoint - Overwrites the image's default ENTRYPOINT which states the start of a command and tacks on the rest from docker run
 # --net - Connect a container to a network
-docker run --name loderunner-fix -d --rm --entrypoint sh --net web ghcr.io/asb-spark/ngsa-lr:spark -c "sleep 99999d"
+docker run --name webvalidate-fix -d --rm --entrypoint sh --net web ghcr.io/asb-spark/docker101-webv:spark -c "sleep 99999d"
 
 # Try to execute fixed load test
-docker exec loderunner-fix dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark.json
+docker exec webvalidate-fix dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark.json
 
 # benchmark.json only changed in container
 # benchmark.json wasn't updated in image
@@ -166,13 +166,13 @@ docker exec loderunner-fix dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchm
 # **NOTE**
 # Can commit changes in a container to an image
 # The commit operation will not include any data contained in volumes mounted inside the container
-# In the loderunner container, the benchmark.json was mounted, and its changes cannot be commited
-# Will make change directly in loderunner-fix container to commit change
+# In the webvalidate container, the benchmark.json was mounted, and its changes cannot be commited
+# Will make change directly in webvalidate-fix container to commit change
 
 # Open shell in container
 # -i - Interactive. Keep STDIN open even if not attached
 # -t - Allocate a pseudo-TTY
-docker exec -it loderunner-fix sh
+docker exec -it webvalidate-fix sh
 
 # Open file in container
 vi benchmark.json
@@ -187,16 +187,16 @@ vi benchmark.json
 exit
 
 # Verify successful load test
-docker exec loderunner-fix dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark.json
+docker exec webvalidate-fix dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark.json
 
 # Commit container change to image
-docker commit loderunner-fix ngsa-lr:sparkfix
+docker commit webvalidate-fix webv-docker101:fix
 
 # Verify new image
 docker images
 
 # Kill container to re-use name
-docker kill loderunner-fix
+docker kill webvalidate-fix
 
 # Run newly create image in container
 # --name - Naming the container
@@ -204,19 +204,19 @@ docker kill loderunner-fix
 # --rm - Automatically remove container when stopped
 # --entrypoint - Overwrites the image's default ENTRYPOINT which states the start of a command and tacks on the rest from docker run
 # --net - Connect a container to a network
-docker run --name loderunner-fix -d --rm --entrypoint sh --net web ngsa-lr:sparkfix -c "sleep 99999d"
+docker run --name webvalidate-fix -d --rm --entrypoint sh --net web docker101-webv:fix -c "sleep 99999d"
 
 # Verify fixed load test
-docker exec loderunner-fix dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark.json
+docker exec webvalidate-fix dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark.json
 ```
 
 ## Dockerfile
 
 ```bash
-# Make sure ./loderunner/benchmark.json is update by replacing 'zzz' with 'api'
+# Make sure ./webvalidate/src/app/benchmark.json in Codespaces is update by replacing 'zzz' with 'api'
 
 # Build image from Dockerfile
-docker build ./loderunner -t ngsa-lr:dockerfile
+docker build ./webvalidate -t docker101-webv:dockerfile
 
 # Verify new image
 docker images
@@ -227,10 +227,10 @@ docker images
 # --rm - Automatically remove container when stopped
 # --entrypoint - Overwrites the image's default ENTRYPOINT which states the start of a command and tacks on the rest from docker run
 # --net - Connect a container to a network
-docker run -d --name loderunner-dockerfile --rm --entrypoint sh --net web ngsa-lr:dockerfile -c "sleep 99999d"
+docker run -d --name webvalidate-dockerfile --rm --entrypoint sh --net web docker101-webv:dockerfile -c "sleep 99999d"
 
 # Verify fixed load test
-docker exec loderunner-dockerfile dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark.json
+docker exec webvalidate-dockerfile dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark.json
 ```
 
 ## Notes
