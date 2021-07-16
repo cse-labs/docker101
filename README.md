@@ -2,56 +2,17 @@
 
 Docker Introduction: <https://docs.microsoft.com/en-us/dotnet/architecture/microservices/container-docker-introduction>
 
-## Overview of Docker Commands
+## Key Docker Concepts
 
-### Images
+- [Getting Docker Images](#getting-docker-images)
+- [Running a Container](#running-a-container)
+- [Publishing Ports](#publishing-ports)
+- [Networks Between Containers](#networks-between-containers)
+- [Shared Volumes](#shared-volumes)
+- [Commit Image Layer](#commit-image-layer)
+- [Dockerfile to Build Images](#dockerfile-to-build-images)
 
-```bash
-# Display local images
-docker images 
-# Pull an image from a repository
-docker pull  
-# Tag image with a nickname that will reference the source image
-docker tag 
-# Save container changes to an image
-docker commit 
-# Push an image up to a repository
-docker push 
-# Build an image from the Dockerfile
-docker build
-```
-
-### Containers
-
-```bash
-# Display current containers
-docker ps
-# Run a container from an image
-docker run
-# Start a new process to run commands in a running container
-docker exec
-# Display container logs
-docker logs
-#  Stop a running container
-docker kill
-# Delete a container
-docker rm
-```
-
-### Networks
-
-```bash
-# Display current networks
-docker network ls
-# Create a network
-docker network create
-# Connect containers to a network
-docker network connect
-# Display network details including connected containers
-docker network inspect
-```
-
-## Getting a Docker Image
+## Getting Docker Images
 
 ```bash
 # See local images
@@ -108,10 +69,14 @@ exit
 docker logs ngsa
 ```
 
-## Ports
+## Publishing Ports
+
+- Publish: The port is automatically exposed as well. The port is accessible from anywhere.
+- Expose : The port is accessible internally by other Docker containers.
+- Neither Published nor Exposed: The port is accessible from within the container.
 
 ```bash
-# Remove the container because we can't expose ports on a running container
+# Remove the container because we can't expose or publish ports on a running container
 docker rm ngsa
 
 # Force the removal of a running container
@@ -121,7 +86,7 @@ docker rm -f ngsa
 # Verify the container was removed
 docker ps -a
 
-# Start a container with an exposed port
+# Start a container with a published port
 # --name - Naming the container
 # -d - Detached
 # --rm - Automatically remove container when stopped
@@ -129,11 +94,11 @@ docker ps -a
 # --in-memory - Not a docker option. Passed in flag to ngsa-app via image's ENTRYPOINT
 docker run --name ngsa -d --rm -p 80:8080 ngsa-app:beta --in-memory
 
-# Verify app on exposed port
+# Verify app on published port
 http localhost:80/version
 ```
 
-## Network
+## Networks Between Containers
 
 ```bash
 # Start a container
@@ -170,7 +135,7 @@ docker exec webvalidate dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark
 # benchmark.json file on the webvalidate container needs to be updated
 ```
 
-## Volumes
+## Shared Volumes
 
 ```bash
 # Kill container
@@ -262,7 +227,7 @@ docker run --name webvalidate-fix -d --rm --entrypoint sh --net web docker101-we
 docker exec webvalidate-fix dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark.json
 ```
 
-## Dockerfile
+## Dockerfile to Build Images
 
 ```bash
 # Make sure ./webvalidate/src/app/benchmark.json in Codespaces is update by replacing 'zzz' with 'api'
