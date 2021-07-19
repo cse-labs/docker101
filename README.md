@@ -162,6 +162,8 @@ docker exec webvalidate dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark
 # Output should no longer show "Failed: * Errors"
 ```
 
+> Data in mounted volumes cannot be committed to an image. This is useful for secrets, large amounts of data that do not need to be included in the image (data science), etc.
+
 ## Commit Image Layer
 
 ```bash
