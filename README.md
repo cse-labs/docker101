@@ -131,7 +131,7 @@ docker network inspect web
 # -f - Not a docker option. Passed in flag to WebV via image's ENTRYPOINT
 docker exec webvalidate dotnet ../webvalidate.dll -s http://ngsa:8080 -f benchmark.json
 
-# Output should show load test "Failed: * Errors"
+# Output should show load test "Test Failed Errors *"
 # benchmark.json file on the webvalidate container needs to be updated
 ```
 
@@ -159,7 +159,7 @@ docker run --name webvalidate -d --rm --entrypoint sh --net web -v $(pwd)/webval
 # Execute WebV load test on ngsa-app with updated benchmark.json
 docker exec webvalidate dotnet ../webvalidate.dll -s http://ngsa:8080 -f benchmark.json
 
-# Output should no longer show "Failed: * Errors"
+# Output should no longer show "Test Failed Errors *"
 ```
 
 > Data in mounted volumes cannot be committed to an image. This is useful for secrets, large amounts of data that do not need to be included in the image (data science), etc.
