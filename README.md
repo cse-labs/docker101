@@ -65,6 +65,9 @@ ls -al
 # Leave the container
 exit
 
+# Verify that the container is still running
+docker ps
+
 # Fetch the logs of the container
 docker logs ngsa
 ```
