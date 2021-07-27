@@ -132,6 +132,7 @@ docker network inspect web
 #      ngsa is the container on the network.
 #      8080 is the port ngsa-app is listening on in the ngsa container.
 # -f - Not a docker option. Passed in flag to WebV via image's ENTRYPOINT
+
 docker exec webvalidate dotnet ../webvalidate.dll -s http://ngsa:8080 -f benchmark.json
 
 # Output should show load test "Test Failed Errors *"
