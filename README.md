@@ -65,6 +65,9 @@ ls -al
 # Leave the container
 exit
 
+# Verify that the container is still running
+docker ps
+
 # Fetch the logs of the container
 docker logs ngsa
 ```
@@ -129,9 +132,10 @@ docker network inspect web
 #      ngsa is the container on the network.
 #      8080 is the port ngsa-app is listening on in the ngsa container.
 # -f - Not a docker option. Passed in flag to WebV via image's ENTRYPOINT
-docker exec webvalidate dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark.json
 
-# Output should show load test "Failed: * Errors"
+docker exec webvalidate dotnet ../webvalidate.dll -s http://ngsa:8080 -f benchmark.json
+
+# Output should show load test "Test Failed Errors *"
 # benchmark.json file on the webvalidate container needs to be updated
 ```
 
@@ -157,10 +161,12 @@ docker run --name webvalidate -d --rm --entrypoint sh --net web -v $(pwd)/webval
 # Replace 'zzz' with 'api'
 
 # Execute WebV load test on ngsa-app with updated benchmark.json
-docker exec webvalidate dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark.json
+docker exec webvalidate dotnet ../webvalidate.dll -s http://ngsa:8080 -f benchmark.json
 
-# Output should no longer show "Failed: * Errors"
+# Output should no longer show "Test Failed Errors *"
 ```
+
+> Data in mounted volumes cannot be committed to an image. This is useful for secrets, large amounts of data that do not need to be included in the image (data science), etc.
 
 ## Commit Image Layer
 
@@ -174,7 +180,7 @@ docker exec webvalidate dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark
 docker run --name webvalidate-fix -d --rm --entrypoint sh --net web ghcr.io/asb-spark/docker101-webv:spark -c "sleep 99999d"
 
 # Try to execute fixed load test
-docker exec webvalidate-fix dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark.json
+docker exec webvalidate-fix dotnet ../webvalidate.dll -s http://ngsa:8080 -f benchmark.json
 
 # benchmark.json only changed in container
 # benchmark.json wasn't updated in image
@@ -204,10 +210,10 @@ vi benchmark.json
 exit
 
 # Verify successful load test
-docker exec webvalidate-fix dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark.json
+docker exec webvalidate-fix dotnet ../webvalidate.dll -s http://ngsa:8080 -f benchmark.json
 
 # Commit container change to image
-docker commit webvalidate-fix webv-docker101:fix
+docker commit webvalidate-fix docker101-webv:fix
 
 # Verify new image
 docker images
@@ -224,7 +230,7 @@ docker kill webvalidate-fix
 docker run --name webvalidate-fix -d --rm --entrypoint sh --net web docker101-webv:fix -c "sleep 99999d"
 
 # Verify fixed load test
-docker exec webvalidate-fix dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark.json
+docker exec webvalidate-fix dotnet ../webvalidate.dll -s http://ngsa:8080 -f benchmark.json
 ```
 
 ## Dockerfile to Build Images
@@ -247,7 +253,7 @@ docker images
 docker run -d --name webvalidate-dockerfile --rm --entrypoint sh --net web docker101-webv:dockerfile -c "sleep 99999d"
 
 # Verify fixed load test
-docker exec webvalidate-dockerfile dotnet ../aspnetapp.dll -s http://ngsa:8080 -f benchmark.json
+docker exec webvalidate-dockerfile dotnet ../webvalidate.dll -s http://ngsa:8080 -f benchmark.json
 ```
 
 ## Notes
