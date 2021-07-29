@@ -1,6 +1,7 @@
-# docker101
+# Docker101
 
 Docker Introduction: <https://docs.microsoft.com/en-us/dotnet/architecture/microservices/container-docker-introduction>
+Docker 101 [video walk through](https://microsoft.sharepoint.com/:v:/t/MicrosoftSPARKRecordings-MSFTInternal/EWCyeqByVWBAt8wDvNZdV-UB0BvU5YVbKm0UHgdrUlI6dg?e=QbPck6) (Microsoft SPARK- MSFT Internal)
 
 ## Key Docker Concepts
 
