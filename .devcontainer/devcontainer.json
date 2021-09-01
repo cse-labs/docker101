@@ -1,6 +1,6 @@
 {
 	"name": "docker101",
-	"image": "ghcr.io/retaildevcrews/kind",
+	"image": "ghcr.io/cse-labs/kind",
 	"runArgs": ["--init", "--privileged"],
 	"overrideCommand": false,
 
