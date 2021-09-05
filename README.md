@@ -1,6 +1,6 @@
 # Docker101
 
-- Docker Introduction: <https://docs.microsoft.com/en-us/dotnet/architecture/microservices/container-docker-introduction> (MS Internal)
+- Docker Introduction: <https://docs.microsoft.com/en-us/dotnet/architecture/microservices/container-docker-introduction>
 - Docker 101 [video walk through](https://microsoft.sharepoint.com/:v:/t/MicrosoftSPARKRecordings-MSFTInternal/EWCyeqByVWBAt8wDvNZdV-UB0BvU5YVbKm0UHgdrUlI6dg?e=QbPck6) (Microsoft SPARK- MS Internal)
 
 ## Key Docker Concepts
@@ -25,10 +25,11 @@ docker pull ghcr.io/retaildevcrews/ngsa-app:beta
 # See the pulled image locally
 docker images
 
-# Tag the image to used a shortened name (ngsa-app:beta)
+# Tag the image to use a shortened name (ngsa-app:beta)
 docker tag ghcr.io/retaildevcrews/ngsa-app:beta ngsa-app:beta
 
-# View the tagged image which references a source image
+# Verify the tagged image references the source image
+# by having the same image ID
 docker images
 ```
 
@@ -39,7 +40,7 @@ docker images
 # -a - Show all containers (default shows just running)
 docker ps -a
 
-# Start a container with a running image
+# Start a container with the ngsa-app:beta image
 # --name - Naming the container
 # -d - Detached
 # --in-memory - Not a docker option. Passed in flag to the ngsa-app via Dockerfile entrypoint
@@ -110,7 +111,7 @@ http localhost:80/version
 # -d - Detached
 # --rm - Automatically remove container when stopped
 # --entrypoint - Overwrites the image's default ENTRYPOINT which states the start of a command and tacks on the rest from docker run
-docker run --name webvalidate -d --rm --entrypoint sh ghcr.io/asb-spark/docker101-webv:spark -c "sleep 999999d"
+docker run --name webvalidate -d --rm --entrypoint sh ghcr.io/cse-labs/docker101-webv:bug -c "sleep 999999d"
 
 # Verify the container is running
 docker ps 
@@ -133,10 +134,9 @@ docker network inspect web
 #      ngsa is the container on the network.
 #      8080 is the port ngsa-app is listening on in the ngsa container.
 # -f - Not a docker option. Passed in flag to WebV via image's ENTRYPOINT
-
 docker exec webvalidate dotnet ../webvalidate.dll -s http://ngsa:8080 -f benchmark.json
 
-# Output should show load test "Test Failed Errors *"
+# Output should show that load tests failed via "Test Failed Errors *"
 # benchmark.json file on the webvalidate container needs to be updated
 ```
 
@@ -156,10 +156,12 @@ docker ps -a
 # --entrypoint - Overwrites the image's default ENTRYPOINT which states the start of a command and tacks on the rest from docker run
 # --net - Connect a container to a network
 # -v - Bind mount a volume
-docker run --name webvalidate -d --rm --entrypoint sh --net web -v $(pwd)/webvalidate/src/app/benchmark.json:/app/TestFiles/benchmark.json ghcr.io/asb-spark/docker101-webv:spark -c "sleep 999999d"
+docker run --name webvalidate -d --rm --entrypoint sh --net web -v $(pwd)/webvalidate/src/app/benchmark.json:/app/TestFiles/benchmark.json ghcr.io/cse-labs/docker101-webv:bug -c "sleep 999999d"
 
-# Update the app/TestFiles/benchmark.json in webvalidate container
+# Open webvalidate/src/app/benchmark.json
 # Replace 'zzz' with 'api'
+# This should also update the app/TestFiles/benchmark.json file in the webvalidate container
+# because we mounted the file in a volume
 
 # Execute WebV load test on ngsa-app with updated benchmark.json
 docker exec webvalidate dotnet ../webvalidate.dll -s http://ngsa:8080 -f benchmark.json
@@ -178,13 +180,13 @@ docker exec webvalidate dotnet ../webvalidate.dll -s http://ngsa:8080 -f benchma
 # --rm - Automatically remove container when stopped
 # --entrypoint - Overwrites the image's default ENTRYPOINT which states the start of a command and tacks on the rest from docker run
 # --net - Connect a container to a network
-docker run --name webvalidate-fix -d --rm --entrypoint sh --net web ghcr.io/asb-spark/docker101-webv:spark -c "sleep 99999d"
+docker run --name webvalidate-fix -d --rm --entrypoint sh --net web ghcr.io/cse-labs/docker101-webv:bug -c "sleep 99999d"
 
 # Try to execute fixed load test
 docker exec webvalidate-fix dotnet ../webvalidate.dll -s http://ngsa:8080 -f benchmark.json
 
-# benchmark.json only changed in container
-# benchmark.json wasn't updated in image
+# benchmark.json only changed in the webvalidate container
+# benchmark.json wasn't updated in the ghcr.io/cse-labs/docker101-webv:bug image
 # New containers from that image won't have the fix
 
 # **NOTE**
@@ -261,39 +263,69 @@ docker exec webvalidate-dockerfile dotnet ../webvalidate.dll -s http://ngsa:8080
 
 Volumes - virtual "discs" to store and share data
 
-* persistent - shared between host and container
-  * docker run -ti -v /Users/root/example:/shared-folder ubuntu bash
-* ephemeral - sticks around while being used by container
-  * docker run -ti -v /shared-data --name containerA ubuntu bash
-  * docker run -ti --volumes-from containerA --name containerB ubuntu bash
+- persistent - shared between host and container
+  - docker run -ti -v /Users/root/example:/shared-folder ubuntu bash
+- ephemeral - sticks around while being used by container
+  - docker run -ti -v /shared-data --name containerA ubuntu bash
+  - docker run -ti --volumes-from containerA --name containerB ubuntu bash
 
 docker system prune -a / docker system prune -f
 
-* It often gets GBs of disk space back. Don't use if debugging big docker build as it will delete all of your cached build layers and you'll rebuild from scratch
-* Remove all unused containers, networks, images (both dangling and unreferenced), and optionally, volumes.
+- It often gets GBs of disk space back. Don't use if debugging big docker build as it will delete all of your cached build layers and you'll rebuild from scratch
+- Remove all unused containers, networks, images (both dangling and unreferenced), and optionally, volumes.
 
 Dockerfile Commands
 
-* FROM - which image to download and start from
-  * must be first command in dockerfile
-  * multiple from commands means dockerfile produces more than one image
-* MAINTAINER
-* RUN - runs the command line, waits for finish, and saves result
-* ADD - adds local files, add the contents of tar archives, and downloads from URLS
-* ENV - sets environment variables and available during build in in resulting image
-* ENTRYPOINT - start of command and tacks on rest of command from docker run
-* CMD - specifies whole command
-  * docker run command replaces CMD
-* ENTRYPOINT + CMD - runs one after another
-* Command syntax for ENTRYPOINT, RUN, and CMD
-  * shell form: nano notes.txt
-    * called surrounded by a shell, like bash
-  * exec form: ["/bin/nano", "notes.txt"]
-    * calls directly
-    * slightly more efficient
-* EXPOSE - exposes port to container
-* VOLUME
-  * shared volumes: VOLUME ["/host/path/" "/container/path/"]
-  * ephemeral volumes: VOLUME ["/shared-data"]
-* WORKDIR - sets directory for remainder of Dockerfile and resulting container when run
-* USER - sets the user the container will run as
+- FROM - which image to download and start from
+  - must be first command in dockerfile
+  - multiple from commands means dockerfile produces more than one image
+- MAINTAINER
+- RUN - runs the command line, waits for finish, and saves result
+- ADD - adds local files, add the contents of tar archives, and downloads from URLS
+- ENV - sets environment variables and available during build in in resulting image
+- ENTRYPOINT - start of command and tacks on rest of command from docker run
+- CMD - specifies whole command
+  - docker run command replaces CMD
+- ENTRYPOINT + CMD - runs one after another
+- Command syntax for ENTRYPOINT, RUN, and CMD
+  - shell form: nano notes.txt
+    - called surrounded by a shell, like bash
+  - exec form: ["/bin/nano", "notes.txt"]
+    - calls directly
+    - slightly more efficient
+- EXPOSE - exposes port to container
+- VOLUME
+  - shared volumes: VOLUME ["/host/path/" "/container/path/"]
+  - ephemeral volumes: VOLUME ["/shared-data"]
+- WORKDIR - sets directory for remainder of Dockerfile and resulting container when run
+- USER - sets the user the container will run as
+
+## Engineering Docs
+
+- Team Working [Agreement](.github/WorkingAgreement.md)
+- Team [Engineering Practices](.github/EngineeringPractices.md)
+- CSE Engineering Fundamentals [Playbook](https://github.com/Microsoft/code-with-engineering-playbook)
+
+## How to file issues and get help  
+
+This project uses GitHub Issues to track bugs and feature requests. Please search the existing issues before filing new issues to avoid duplicates. For new issues, file your bug or feature request as a new issue.
+
+For help and questions about using this project, please open a GitHub issue.
+
+## Contributing
+
+This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit <https://cla.opensource.microsoft.com>
+
+When you submit a pull request, a CLA bot will automatically determine whether you need to provide a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions provided by the bot. You will only need to do this once across all repos using our CLA.
+
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+
+## Trademarks
+
+This project may contain trademarks or logos for projects, products, or services.
+
+Authorized use of Microsoft trademarks or logos is subject to and must follow [Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general).
+
+Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship.
+
+Any use of third-party trademarks or logos are subject to those third-party's policies.
