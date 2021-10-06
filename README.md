@@ -5,13 +5,20 @@
 
 ## Key Docker Concepts
 
-- [Getting Docker Images](#getting-docker-images)
-- [Running a Container](#running-a-container)
-- [Publishing Ports](#publishing-ports)
-- [Networks Between Containers](#networks-between-containers)
-- [Shared Volumes](#shared-volumes)
-- [Commit Image Layer](#commit-image-layer)
-- [Dockerfile to Build Images](#dockerfile-to-build-images)
+- [Docker101](#docker101)
+  - [Key Docker Concepts](#key-docker-concepts)
+  - [Getting Docker Images](#getting-docker-images)
+  - [Running a Container](#running-a-container)
+  - [Publishing Ports](#publishing-ports)
+  - [Networks Between Containers](#networks-between-containers)
+  - [Shared Volumes](#shared-volumes)
+  - [Commit Image Layer](#commit-image-layer)
+  - [Dockerfile to Build Images](#dockerfile-to-build-images)
+  - [Notes](#notes)
+  - [Engineering Docs](#engineering-docs)
+  - [How to file issues and get help](#how-to-file-issues-and-get-help)
+  - [Contributing](#contributing)
+  - [Trademarks](#trademarks)
 
 ## Getting Docker Images
 
@@ -61,8 +68,10 @@ docker exec -it ngsa sh
 # The prompt changed
 # We are now "in" the docker container
 
-# Run some commands in the container
-ls -al
+# Run some commands in the container, e.g. `ps`
+# `ps` command shows the processes run inside a container.
+# By default the should be only one process `dotnet aspnetapp.dll --in-memory`. But, as you entered a container you had created another process which is `sh` and as you executed `ps` command you can see the 3rd process which is `ps` itself.
+ps
 
 # Leave the container
 exit
@@ -81,10 +90,14 @@ docker logs ngsa
 - Neither Published nor Exposed: The port is accessible from within the container.
 
 ```bash
-# Remove the container because we can't expose or publish ports on a running container
+# Remove the container because we can't expose or publish ports on a running container.
+# Firstly, you need to stop the running container
+docker stop ngsa
+
+# Then you can remove it
 docker rm ngsa
 
-# Force the removal of a running container
+# Optionally, a force removal of a running container can be executed
 # -f - Force the removal of a running container
 docker rm -f ngsa
 
