@@ -256,7 +256,7 @@ docker images
 docker run -d --name webvalidate-dockerfile --rm --entrypoint sh --net web docker101-webv:dockerfile -c "sleep 99999d"
 
 # Verify fixed load test
-docker exec webvalidate-dockerfile dotnet ../webvalidate.dll -s http://ngsa:8080 -f benchmark.json
+docker exec webvalidate-dockerfile dotnet ../webvalidate.dll -s http://ngsa:8080 -f benchmark.json --summary Tsv
 ```
 
 ## Notes
