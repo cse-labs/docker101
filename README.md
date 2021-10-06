@@ -143,8 +143,8 @@ docker exec webvalidate dotnet ../webvalidate.dll -s http://ngsa:8080 -f benchma
 ## Shared Volumes
 
 ```bash
-# Kill container
-docker kill webvalidate
+# Stop container
+docker stop webvalidate
 
 # Verify container was removed when stopped
 docker ps -a
@@ -221,8 +221,8 @@ docker commit webvalidate-fix docker101-webv:fix
 # Verify new image
 docker images
 
-# Kill container to re-use name
-docker kill webvalidate-fix
+# Stop container to re-use name
+docker stop webvalidate-fix
 
 # Run newly create image in container
 # --name - Naming the container
